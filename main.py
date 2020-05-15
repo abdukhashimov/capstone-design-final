@@ -1,33 +1,34 @@
 import cv2
-import numpy as np
-from sklearn.linear_model import LinearRegression
-import math
 
+import numpy as np
+
+from sklearn.linear_model import LinearRegression
+
+# global constant variables for turning image into edge
 KERNEL_SIZE = 5
 THRESHOLD_MIN = 100
 THRESHOLD_MAX = 150
 
-RHO = 1
-THETA = np.pi/180
-THRESHOLD = 30
-MIN_LINE_LENGTH = 2
+# global constant variables for createing hough transform
+RHO = 1             # the resolutio of paramter r in pixel, we are using 1
+THETA = np.pi/180   # the value of theta in radians, here it is 1
+THRESHOLD = 30      # the minimum number of intersections, 30
+MIN_LINE_LENGTH = 2  # the min number of points that can form a line
+# max line between two points to be considered in the same line
 MAX_LINE_GAP = 150
 
-
-def open_main_image(image_name=None):
-    if image_name is None:
-        raise ValueError("Please make sure you providede file name")
-        sys.exit(0)
-    try:
-        image = cv2.imread(image_name)
-    except Exception as e:
-        print(e)
-        sys.exit(0)
-
-    return image
+# end of defning global variables
 
 
 def get_canny_edge_detected(image=None):
+    """the function receives an [image] as an argument
+
+    The list of things that function performs
+    1. checks if image is not None
+    2. turns the color image to Gray Scale
+    3. blurs the image to reduce the noise
+    4. detects edges using canny edge detection
+    """
 
     if image is None:
         raise ValueError("please provide image file!")
@@ -42,14 +43,26 @@ def get_canny_edge_detected(image=None):
     # cv2.imshow('blured_image', blured_image)
     # cv2.waitKey(5000)
     edges = cv2.Canny(blured_image, THRESHOLD_MIN, THRESHOLD_MAX)
+
     return edges
 
 
 def get_region_of_interest(image):
+    """Selects the region of interest and returns the mask of ROI
+
+    The list of things funciton that does
+    1. detects the height of given image
+    2. generates the rectangular shape with type of ndarray
+    3. creates the mask which is the same size as given frame
+    4. takes the and of frame and the generated ROI - region of interest
+    """
+
     height = image.shape[0]
+
     rectangle = np.array([
         [(345, height), (550, 550), (780, 550), (1100, height)]
     ], dtype=np.int32)
+
     mask = np.zeros_like(image)
     cv2.fillPoly(mask, rectangle, 255)
     masked_image = cv2.bitwise_and(image, mask,)
